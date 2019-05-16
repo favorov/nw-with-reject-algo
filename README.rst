@@ -1,5 +1,5 @@
 ===============================================================================
-nw-with-reject-algo - Needleman-Wunsch Alignment with rejecting in Go
+nwwreject - Needleman-Wunsch Alignment with rejecting in Go
 ===============================================================================
 
 -------------------------------------------------------------------------------
@@ -27,7 +27,12 @@ Fetch from github::
 -------------------------------------------------------------------------------
 Usage
 -------------------------------------------------------------------------------
+Align 2 DNA sequences::
 
+$nwwreject -seq1 GAAAAAAT -seq2 GAAT
+	GAAAAAAT
+	GAA----T
+	Score: 0
 
 From code::
 
