@@ -1,4 +1,4 @@
-// Copyright 2015 Andrew E. Bruno, 2019 A. Favorov. 
+// Copyright 2015 Andrew E. Bruno, 2019 Alexnder (Sasha) Favorov. 
 // All rights reserved.
 // Use of this source code is governed by a MIT style
 // license that can be found in the LICENSE file.
@@ -14,7 +14,6 @@ import (
 
 var seq1 = flag.String("seq1", "", "first sequence")
 var seq2 = flag.String("seq2", "", "second sequence")
-var match = flag.Int("match", 1, "match score")
 var mismatch = flag.Int("mismatch", -1, "mismatch score")
 var gap = flag.Int("gap", -1, "gap penalty")
 var threshold = flag.Int("threshold", 0, "threshold to reject")
@@ -25,9 +24,9 @@ func main() {
 		log.Fatal("Please provide 2 sequences to align. See nwalgo --help")
 	}
 
-	aln1, aln2, score,ok := nwwreject.Align(*seq1, *seq2, *match, *mismatch, *gap,*threshold)
+	aln1, aln2, dist ,ok := nwwreject.Align(*seq1, *seq2, *mismatch, *gap,*threshold)
 	if ok {
-		fmt.Printf("%s\n%s\nScore: %d\n", aln1, aln2, score)
+		fmt.Printf("%s\n%s\nScore: %d\n", aln1, aln2, dist)
 	} else {
 		fmt.Printf("Sequences differ too much.\n")
 	}

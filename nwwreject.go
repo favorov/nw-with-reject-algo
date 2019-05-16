@@ -1,8 +1,9 @@
-// Copyright 2015 Andrew E. Bruno. All rights reserved.
+// Copyright 2015 Andrew E. Bruno, 2019 Alexnder (Sasha) Favorov. 
+// All rights reserved.
 // Use of this source code is governed by a MIT style
 // license that can be found in the LICENSE file.
 
-package nwalgo
+package nwwrej
 
 var (
 	Up   byte = 1
@@ -15,7 +16,7 @@ func idx(i, j, bLen int) int {
 	return (i * bLen) + j
 }
 
-func Align(a, b string, match, mismatch, gap int) (alignA, alignB string, score int) {
+func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, score int, ok bool) {
 
 	aLen := len(a) + 1
 	bLen := len(b) + 1
