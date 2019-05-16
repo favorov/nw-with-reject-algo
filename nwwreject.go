@@ -16,7 +16,9 @@ func idx(i, j, bLen int) int {
 	return (i * bLen) + j
 }
 
-func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, score int, ok bool) {
+func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
+	
+	if(threshold>0){threshold++} //to do something
 
 	aLen := len(a) + 1
 	bLen := len(b) + 1
@@ -47,36 +49,36 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, sc
 		for j := 1; j < bLen; j++ {
 			matchMismatch := mismatch
 			if a[i-1] == b[j-1] {
-				matchMismatch = match
+				matchMismatch = 0 
 			}
 
-			max := f[idx(i-1, j-1, bLen)] + matchMismatch
+			min := f[idx(i-1, j-1, bLen)] + matchMismatch
 			hgap := f[idx(i-1, j, bLen)] + gap
 			vgap := f[idx(i, j-1, bLen)] + gap
 
-			if hgap > max {
-				max = hgap
+			if hgap < min {
+				min = hgap
 			}
-			if vgap > max {
-				max = vgap
+			if vgap < min {
+				min = vgap
 			}
 
 			p := NW
-			if max == hgap {
+			if min == hgap {
 				p = Up
-			} else if max == vgap {
+			} else if min == vgap {
 				p = Left
 			}
 
 			pointer[idx(i, j, bLen)] = p
-			f[idx(i, j, bLen)] = max
+			f[idx(i, j, bLen)] = min
 		}
 	}
 
 	i := aLen - 1
 	j := bLen - 1
 
-	score = f[idx(i, j, bLen)]
+	dist = f[idx(i, j, bLen)]
 
 	for p := pointer[idx(i, j, bLen)]; p != None; p = pointer[idx(i, j, bLen)] {
 		if p == NW {
@@ -98,7 +100,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, sc
 	reverse(aBytes)
 	reverse(bBytes)
 
-	return string(aBytes), string(bBytes), score
+	return string(aBytes), string(bBytes), dist, true 
 }
 
 func reverse(a []byte) {
