@@ -5,6 +5,8 @@
 
 package nwwreject
 
+import math
+
 var (
 	Up   byte = 1
 	Left byte = 2
@@ -35,12 +37,24 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	pointer := make([]byte, aLen*bLen)
 
 	for i := 1; i < aLen; i++ {
-		f[idx(i, 0, bLen)] = gap * i
-		pointer[idx(i, 0, bLen)] = Up
+		dist:=gap * i
+		if dist<=threshold {
+			f[idx(i, 0, bLen)] = dist 
+			pointer[idx(i, 0, bLen)] = Up
+		} else {
+			f[idx(i, 0, bLen)]=math.MaxInt32
+			break
+		}
 	}
 	for j := 1; j < bLen; j++ {
-		f[idx(0, j, bLen)] = gap * j
-		pointer[idx(0, j, bLen)] = Left
+		dist:=gap * j
+		if dist<=threshold {
+			f[idx(0, j, bLen)] = dist 
+			pointer[idx(0, j, bLen)] = Left
+		} else {
+			f[idx(0, j, bLen)] = math.MaxInt32 
+			break
+		}
 	}
 
 	pointer[0] = None
