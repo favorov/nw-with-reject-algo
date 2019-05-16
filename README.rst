@@ -26,7 +26,7 @@ Install
 
 Fetch from github::
 
-    $ go get github.com/favorov/nwwreject/...
+    $ go get github.com/favorov/nwwreject
 
 -------------------------------------------------------------------------------
 Usage
