@@ -11,7 +11,8 @@ var (
 	Up   byte = 1
 	Left byte = 2
 	NW   byte = 3
-	None byte = 4
+	Here byte = 4
+	Stop byte = 5
 )
 
 func idx(i, j, bLen int) int {
@@ -20,8 +21,6 @@ func idx(i, j, bLen int) int {
 
 func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
 	
-	if(threshold>0){threshold++} //to do something
-
 	aLen := len(a) + 1
 	bLen := len(b) + 1
 
@@ -42,7 +41,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			f[idx(i, 0, bLen)] = dist 
 			pointer[idx(i, 0, bLen)] = Up
 		} else {
-			f[idx(i, 0, bLen)]=math.MaxInt32
+			pointer[idx(i, 0, bLen)] = No
 			break
 		}
 	}
@@ -52,12 +51,12 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			f[idx(0, j, bLen)] = dist 
 			pointer[idx(0, j, bLen)] = Left
 		} else {
-			f[idx(0, j, bLen)] = math.MaxInt32 
+			pointer[idx(0, j, bLen)] = No 
 			break
 		}
 	}
 
-	pointer[0] = None
+	pointer[0] = Here 
 
 	for i := 1; i < aLen; i++ {
 		for j := 1; j < bLen; j++ {
@@ -94,7 +93,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 
 	dist = f[idx(i, j, bLen)]
 
-	for p := pointer[idx(i, j, bLen)]; p != None; p = pointer[idx(i, j, bLen)] {
+	for p := pointer[idx(i, j, bLen)]; p != Here; p = pointer[idx(i, j, bLen)] {
 		if p == NW {
 			aBytes = append(aBytes, a[i-1])
 			bBytes = append(bBytes, b[j-1])
