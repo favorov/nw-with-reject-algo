@@ -9,7 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"github.com/favorov/nwwrej"
+	"github.com/favorov/nwwreject"
 )
 
 var seq1 = flag.String("seq1", "", "first sequence")
