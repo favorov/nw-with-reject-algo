@@ -5,7 +5,7 @@
 
 package nwwreject
 
-import math
+import log
 
 var (
 	Up   byte = 1
@@ -37,29 +37,31 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 
 	for i := 1; i < aLen; i++ {
 		dist:=gap * i
+		f[idx(i, 0, bLen)] = dist 
 		if dist<=threshold {
-			f[idx(i, 0, bLen)] = dist 
 			pointer[idx(i, 0, bLen)] = Up
 		} else {
-			pointer[idx(i, 0, bLen)] = No
+			pointer[idx(i, 0, bLen)] = Stop
 			break
 		}
 	}
 	for j := 1; j < bLen; j++ {
 		dist:=gap * j
+		f[idx(0, j, bLen)] = dist 
 		if dist<=threshold {
-			f[idx(0, j, bLen)] = dist 
 			pointer[idx(0, j, bLen)] = Left
 		} else {
-			pointer[idx(0, j, bLen)] = No 
+			pointer[idx(0, j, bLen)] = Stop 
 			break
 		}
 	}
 
 	pointer[0] = Here 
 
+	first_nonstop_prev:=0
+	//coord of the forst nonstop in previous line of alignment matrix	
 	for i := 1; i < aLen; i++ {
-		for j := 1; j < bLen; j++ {
+		for j := first_nonstop_prev+1; j < bLen; j++ {
 			matchMismatch := mismatch
 			if a[i-1] == b[j-1] {
 				matchMismatch = 0 
@@ -107,6 +109,9 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			aBytes = append(aBytes, '-')
 			bBytes = append(bBytes, b[j-1])
 			j--
+		}
+		} else if p == Stop {
+			log.Fatalln("Stop is found on the alignment way. I am lost.")
 		}
 	}
 
