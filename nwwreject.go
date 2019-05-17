@@ -1,11 +1,11 @@
-// Copyright 2015 Andrew E. Bruno, 2019 Alexnder (Sasha) Favorov. 
+// Copyright 2015 Andrew E. Bruno, 2019 Alexnder (Sasha) Favorov.
 // All rights reserved.
 // Use of this source code is governed by a MIT style
 // license that can be found in the LICENSE file.
 
 package nwwreject
 
-import log
+import "log"
 
 var (
 	Up   byte = 1
@@ -20,7 +20,7 @@ func idx(i, j, bLen int) int {
 }
 
 func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
-	
+
 	aLen := len(a) + 1
 	bLen := len(b) + 1
 
@@ -36,9 +36,9 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	pointer := make([]byte, aLen*bLen)
 
 	for i := 1; i < aLen; i++ {
-		dist:=gap * i
-		f[idx(i, 0, bLen)] = dist 
-		if dist<=threshold {
+		dist := gap * i
+		f[idx(i, 0, bLen)] = dist
+		if dist <= threshold {
 			pointer[idx(i, 0, bLen)] = Up
 		} else {
 			pointer[idx(i, 0, bLen)] = Stop
@@ -46,25 +46,29 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 		}
 	}
 	for j := 1; j < bLen; j++ {
-		dist:=gap * j
-		f[idx(0, j, bLen)] = dist 
-		if dist<=threshold {
+		dist := gap * j
+		f[idx(0, j, bLen)] = dist
+		if dist <= threshold {
 			pointer[idx(0, j, bLen)] = Left
 		} else {
-			pointer[idx(0, j, bLen)] = Stop 
+			pointer[idx(0, j, bLen)] = Stop
 			break
 		}
 	}
 
-	pointer[0] = Here 
+	pointer[0] = Here
 
-	first_nonstop_prev:=0
-	//coord of the forst nonstop in previous line of alignment matrix	
+	first_nonstop_prev := 0
+	//coord of the first nonstop in previous line of alignment matrix
+	//the coord is a letter coord, 0 means we look at coord 1 of matrix that is coord 0
+	//of the b string
 	for i := 1; i < aLen; i++ {
-		for j := first_nonstop_prev+1; j < bLen; j++ {
+		for j := first_nonstop_prev + 1; j < bLen; j++ {
+			nonstop_found := 0 //we count them; if we get break and there are 0 there, we return fail
+
 			matchMismatch := mismatch
 			if a[i-1] == b[j-1] {
-				matchMismatch = 0 
+				matchMismatch = 0
 			}
 
 			min := f[idx(i-1, j-1, bLen)] + matchMismatch
@@ -76,6 +80,12 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			}
 			if vgap < min {
 				min = vgap
+			}
+
+			if min > threshold {
+				pointer[idx(i, j, bLen)] = Stop
+				f[idx(i, j, bLen)] = min
+				break //do not go right
 			}
 
 			p := NW
@@ -109,7 +119,6 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			aBytes = append(aBytes, '-')
 			bBytes = append(bBytes, b[j-1])
 			j--
-		}
 		} else if p == Stop {
 			log.Fatalln("Stop is found on the alignment way. I am lost.")
 		}
@@ -118,7 +127,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	reverse(aBytes)
 	reverse(bBytes)
 
-	return string(aBytes), string(bBytes), dist, true 
+	return string(aBytes), string(bBytes), dist, true
 }
 
 func reverse(a []byte) {
