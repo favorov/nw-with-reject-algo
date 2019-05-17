@@ -62,9 +62,9 @@ From code::
 
     func main() {
         score_1_d,ok_1_d := nwwreject.Distance("GAAAAAAT", "GAAT", 1, 1, 1) //rejected, returns threshold, false
-        score_0_d,ok_0_d := nwwreject.Distance("GAAAAAAT", "GAAT", 1, 1, 5) //sucess, returns score, true
-        aln1, aln2, score, ok_1_a := nwwreject.Align("GAAAAAAT", "GAAT", 1, 1, 1)//rejected, returns "","", threshold, false
-        aln1, aln2, score, ok_0_a := nwwreject.Align("GAAAAAAT", "GAAT", 1, 1, 5) //returns aln1,aln2,score,true
+        score_5_d,ok_5_d := nwwreject.Distance("GAAAAAAT", "GAAT", 1, 1, 5) //sucess, returns score, true
+        aln1_1, aln2_1, score_, ok_1_a := nwwreject.Align("GAAAAAAT", "GAAT", 1, 1, 1)//rejected, returns "","", threshold, false
+        aln1_5, aln2_5, score, ok_5_a := nwwreject.Align("GAAAAAAT", "GAAT", 1, 1, 5) //returns aln1,aln2,score,true
     }
 
 -------------------------------------------------------------------------------
