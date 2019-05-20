@@ -52,19 +52,27 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			pointer[idx(0, j, bLen)] = Left
 		} else {
 			pointer[idx(0, j, bLen)] = Stop
+			we_broke_at:=j
+			//where the Stop appeared in a finshed line
 			break
 		}
 	}
 
 	pointer[0] = Here
 
-	first_nonstop_prev := 0
-	//coord of the first nonstop in previous line of alignment matrix
-	//the coord is a letter coord, 0 means we look at coord 1 of matrix that is coord 0
-	//of the b string
+	start_next_at:=1
+	//where from to start next line of alignment matrix
+
+	//we_broke_at is a critical value. 
+	//if we are on the right of (we are on the next line),
+	//we do not check any directions other than left
+	//if we do not open good cells on this line and we are under the we_broke_at
+	//we do not test we_broke_at+1
+	//we break completely
 	for i := 1; i < aLen; i++ {
-		for j := first_nonstop_prev + 1; j < bLen; j++ {
-			nonstop_found := 0 //we count them; if we get break and there are 0 there, we return fail
+		for j := start_next_at; j < bLen; j++ {
+			nonstop_already_found := false 
+			//we count them; if we get break and there are 0 there, we return fail
 
 			matchMismatch := mismatch
 			if a[i-1] == b[j-1] {
@@ -85,8 +93,21 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			if min > threshold {
 				pointer[idx(i, j, bLen)] = Stop
 				f[idx(i, j, bLen)] = min
-				break //do not go right
+				if nonstop_already_found {
+					//do not go right, it was ok and then it is bad again,
+					//we left the good area
+					we_broke_at=j
+					break 
+				} 
+				else {
+					continue //looking
+				}
 			}
+			else { //good area!!
+				nonstop_already_found=true
+				start_next_at=j //makes no sense to start under stop
+			}
+
 
 			p := NW
 			if min == hgap {
