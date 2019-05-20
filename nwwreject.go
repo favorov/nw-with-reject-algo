@@ -32,6 +32,8 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	aBytes := make([]byte, 0, maxLen)
 	bBytes := make([]byte, 0, maxLen)
 
+	var we_broke_at int
+	
 	f := make([]int, aLen*bLen)
 	pointer := make([]byte, aLen*bLen)
 
@@ -52,7 +54,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			pointer[idx(0, j, bLen)] = Left
 		} else {
 			pointer[idx(0, j, bLen)] = Stop
-			we_broke_at:=j
+			we_broke_at=j
 			//where the Stop appeared in a finshed line
 			break
 		}
@@ -98,12 +100,10 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 					//we left the good area
 					we_broke_at=j
 					break 
-				} 
-				else {
+				} else {
 					continue //looking
 				}
-			}
-			else { //good area!!
+			} else { //good area!!
 				nonstop_already_found=true
 				start_next_at=j //makes no sense to start under stop
 			}
