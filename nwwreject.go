@@ -106,7 +106,9 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			}
 			
 			f[idx(i, j, bLen)] = min
-
+			
+			log.Println(i,j,min.threshold,we_broke_at)
+			
 			if min > threshold {
 				pointer[idx(i, j, bLen)] = Stop //the value is set already
 				if nonstop_already_found {
