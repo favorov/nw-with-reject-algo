@@ -131,7 +131,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			
 			f[idx(i, j, bLen)] = min
 			
-			log.Println(i,j,min,threshold,we_broke_at) //debuug
+			log.Println("i:",i," j:",j," min:",min," p:",pointer[idx(i, j, bLen)]," tr:",threshold," st:",start_next_at," br:",we_broke_at) //debuug
 			
 			if min > threshold {
 				pointer[idx(i, j, bLen)] = Stop //the value is set already
@@ -150,7 +150,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 					}
 					continue //looking
 				}
-			} else { //good area!!
+			} else if !nonstop_already_found{ //good area started!!
 				nonstop_already_found=true
 				start_next_at=j //makes no sense to start under stop
 			}
