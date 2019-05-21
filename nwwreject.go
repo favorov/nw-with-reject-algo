@@ -6,7 +6,7 @@
 package nwwreject
 import "log"
 
-var version string = "0.0.1"
+var Version string = "0.0.1"
 
 var (
 	Up   byte = 1
@@ -22,7 +22,7 @@ func idx(i, j, bLen int) int {
 
 func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
 
-	log.Println("nwwreject.Align ",version)
+	log.Println("nwwreject.Align ",Version)
 	aLen := len(a) + 1
 	bLen := len(b) + 1
 

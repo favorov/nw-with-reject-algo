@@ -25,7 +25,7 @@ func main() {
 		log.Fatal("Please provide 2 sequences to align. See nwwreject --help")
 	}
 
-	fmt.Printf("Calling nwwreject version",nwwreject.version)
+	fmt.Printf("Calling nwwreject version",nwwreject.Version)
 	aln1, aln2, dist ,ok := nwwreject.Align(*seq1, *seq2, *mismatch, *gap,*threshold)
 	if ok {
 		fmt.Printf("%s\n%s\nDistance: %d\n", aln1, aln2, dist)
