@@ -22,7 +22,7 @@ func idx(i, j, bLen int) int {
 
 func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
 
-	log.Println("nwwreject.Align ",Version)
+	//log.Println("nwwreject.Align ",Version)
 	aLen := len(a) + 1
 	bLen := len(b) + 1
 
@@ -77,6 +77,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 		nonstop_already_found := false 
 		for j := start_next_at; j < bLen; j++ {
 			var min int
+			we_broke_at=bLen //debuug
 			if (j<=we_broke_at) {	
 				matchMismatch := mismatch
 				if a[i-1] == b[j-1] {
@@ -111,6 +112,8 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			
 			log.Println(i,j,min,threshold,we_broke_at)
 			
+			continue; //debuug
+
 			if min > threshold {
 				pointer[idx(i, j, bLen)] = Stop //the value is set already
 				if nonstop_already_found {
