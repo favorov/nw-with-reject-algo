@@ -5,7 +5,7 @@
 
 package nwwreject
 
-var version string = "0.0.9"
+var version string = "0.0.1"
 
 import "log"
 
