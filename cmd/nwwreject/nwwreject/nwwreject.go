@@ -5,6 +5,7 @@
 
 package nwwreject
 import "log"
+import "fmt"
 
 var Version string = "0.0.1"
 
@@ -18,6 +19,26 @@ var (
 
 func idx(i, j, bLen int) int {
 	return (i * bLen) + j
+}
+
+func logmati(mat []int,aLen int, bLen int) {
+	for i := 0; i < aLen; i++ {
+		for j := 0; j < bLen; j++ {
+			fmt.Print(mat[idx(i, j, bLen)],"  ")
+		}
+		fmt.Println()
+	}
+	fmt.Println()
+}
+
+func logmatb(mat []byte,aLen int, bLen int) {
+	for i := 0; i < aLen; i++ {
+		for j := 0; j < bLen; j++ {
+			fmt.Print(mat[idx(i, j, bLen)],"  ")
+		}
+		fmt.Println()
+	}
+	fmt.Println()
 }
 
 func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
@@ -34,7 +55,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	aBytes := make([]byte, 0, maxLen)
 	bBytes := make([]byte, 0, maxLen)
 
-	var we_broke_at int
+	we_broke_at:=bLen //move it away 
 	
 	f := make([]int, aLen*bLen)
 	pointer := make([]byte, aLen*bLen)
@@ -49,6 +70,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			break
 		}
 	}
+
 	for j := 1; j < bLen; j++ {
 		dist := gap * j
 		f[idx(0, j, bLen)] = dist
@@ -77,7 +99,6 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 		nonstop_already_found := false 
 		for j := start_next_at; j < bLen; j++ {
 			var min int
-			we_broke_at=bLen //debuug
 			if (j<=we_broke_at) {	
 				matchMismatch := mismatch
 				if a[i-1] == b[j-1] {
@@ -112,8 +133,6 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			
 			log.Println(i,j,min,threshold,we_broke_at) //debuug
 			
-			//continue; //debuug
-
 			if min > threshold {
 				pointer[idx(i, j, bLen)] = Stop //the value is set already
 				if nonstop_already_found {
@@ -141,7 +160,9 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	}
 	
 
-	log.Println("restoring..)
+	log.Println("restoring..")
+	logmati(f,aLen,bLen)
+	logmatb(pointer,aLen,bLen)
 
 	i := aLen - 1
 	j := bLen - 1
@@ -164,7 +185,10 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			j--
 		} else if p == Stop {
 			log.Fatalln("Stop is found on the alignment way. I am lost.")
+		} else {
+			log.Fatalln("Unknown something is found on the alignment way. I am lost.")
 		}
+
 	}
 
 	reverse(aBytes)
