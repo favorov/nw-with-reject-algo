@@ -27,7 +27,7 @@ func main() {
 
 	aln1, aln2, dist ,ok := nwwreject.Align(*seq1, *seq2, *mismatch, *gap,*threshold)
 	if ok {
-		fmt.Printf("%s\n%s\nScore: %d\n", aln1, aln2, dist)
+		fmt.Printf("%s\n%s\nDistance: %d\n", aln1, aln2, dist)
 	} else {
 		fmt.Printf("Sequences differ too much.\n")
 	}
