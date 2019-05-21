@@ -43,7 +43,6 @@ func logmatb(mat []byte,aLen int, bLen int) {
 
 func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
 
-	//log.Println("nwwreject.Align ",Version)
 	aLen := len(a) + 1
 	bLen := len(b) + 1
 
@@ -89,6 +88,8 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	start_next_at:=1
 	//where from to start next line of alignment matrix
 
+	give_up:=false
+
 	//we_broke_at is a critical value. 
 	//if we are on the right of we_broke_at (we are on the next line),
 	//we do not check any directions other than left
@@ -96,6 +97,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	//we do not test we_broke_at+1
 	//we break completely
 	for i := 1; i < aLen; i++ {
+		if give_up {break;}
 		nonstop_already_found := false 
 		for j := start_next_at; j < bLen; j++ {
 			var min int
@@ -131,7 +133,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			
 			f[idx(i, j, bLen)] = min
 			
-			log.Println("i:",i," j:",j," min:",min," p:",pointer[idx(i, j, bLen)]," tr:",threshold," st:",start_next_at," br:",we_broke_at) //debuug
+			fmt.Println("i:",i," j:",j," min:",min," p:",pointer[idx(i, j, bLen)]," tr:",threshold," st:",start_next_at," br:",we_broke_at," msaf:",nonstop_already_found) //debuug
 			
 			if min > threshold {
 				pointer[idx(i, j, bLen)] = Stop //the value is set already
@@ -141,12 +143,9 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 					we_broke_at=j
 					break 
 				} else {
-					if j>= we_broke_at { // we are under we_broke_at stop of prev line and we did not find any good area - we break completely
-						alignA=""
-						alignB=""
-						dist=threshold+1
-						ok=false
-						return
+					if j>= we_broke_at { // we are under we_broke_at stop of prev line and we did not find any good area - we break completely (give_up)
+						give_up=true
+						break
 					}
 					continue //looking
 				}
@@ -159,10 +158,18 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 		}
 	}
 	
-
-	log.Println("restoring..")
 	logmati(f,aLen,bLen)
 	logmatb(pointer,aLen,bLen)
+	
+	if (give_up) { //we gave up
+		alignA=""
+		alignB=""
+		dist=threshold+1
+		ok=false
+		return
+	}
+
+	log.Println("restoring..")
 
 	i := aLen - 1
 	j := bLen - 1
