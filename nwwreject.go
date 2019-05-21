@@ -5,6 +5,8 @@
 
 package nwwreject
 
+var version string = "0.0.9"
+
 import "log"
 
 var (
@@ -21,6 +23,7 @@ func idx(i, j, bLen int) int {
 
 func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
 
+	log.Println("nwwreject.Align ",version)
 	aLen := len(a) + 1
 	bLen := len(b) + 1
 
@@ -107,7 +110,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			
 			f[idx(i, j, bLen)] = min
 			
-			//log.Println(i,j,min.threshold,we_broke_at)
+			log.Println(i,j,min.threshold,we_broke_at)
 			
 			if min > threshold {
 				pointer[idx(i, j, bLen)] = Stop //the value is set already
