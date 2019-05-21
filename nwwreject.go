@@ -110,9 +110,9 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			
 			f[idx(i, j, bLen)] = min
 			
-			log.Println(i,j,min,threshold,we_broke_at)
+			log.Println(i,j,min,threshold,we_broke_at) //debuug
 			
-			continue; //debuug
+			//continue; //debuug
 
 			if min > threshold {
 				pointer[idx(i, j, bLen)] = Stop //the value is set already
@@ -139,6 +139,9 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 
 		}
 	}
+	
+
+	log.Println("restoring..)
 
 	i := aLen - 1
 	j := bLen - 1
