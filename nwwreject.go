@@ -66,41 +66,59 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	//where from to start next line of alignment matrix
 
 	//we_broke_at is a critical value. 
-	//if we are on the right of (we are on the next line),
+	//if we are on the right of we_broke_at (we are on the next line),
 	//we do not check any directions other than left
 	//if we do not open good cells on this line and we are under the we_broke_at
 	//we do not test we_broke_at+1
 	//we break completely
 	for i := 1; i < aLen; i++ {
+		nonstop_already_found := false 
 		for j := start_next_at; j < bLen; j++ {
-			nonstop_already_found := false 
-			//we count them; if we get break and there are 0 there, we return fail
+			if (j<=we_broke_at) {	
+				matchMismatch := mismatch
+				if a[i-1] == b[j-1] {
+					matchMismatch = 0
+				}
 
-			matchMismatch := mismatch
-			if a[i-1] == b[j-1] {
-				matchMismatch = 0
-			}
+				min := f[idx(i-1, j-1, bLen)] + matchMismatch
+				vgap := f[idx(i, j-1, bLen)] + gap
+				hgap := f[idx(i-1, j, bLen)] + gap
 
-			min := f[idx(i-1, j-1, bLen)] + matchMismatch
-			hgap := f[idx(i-1, j, bLen)] + gap
-			vgap := f[idx(i, j-1, bLen)] + gap
+				if hgap < min {
+					min = hgap
+				}
+				if vgap < min {
+					min = vgap
+				}
+				p := NW
+				if min == hgap {
+					p = Up
+				} else if min == vgap {
+					p = Left
+				}
 
-			if hgap < min {
-				min = hgap
-			}
-			if vgap < min {
-				min = vgap
+				pointer[idx(i, j, bLen)] = p
+				f[idx(i, j, bLen)] = min
+			} else {
+				pointer[idx(i, j, bLen)] = Left 
+				f[idx(i, j, bLen)] = f[idx(i, j-1, bLen)] + gap
 			}
 
 			if min > threshold {
-				pointer[idx(i, j, bLen)] = Stop
-				f[idx(i, j, bLen)] = min
+				pointer[idx(i, j, bLen)] = Stop //the value is set already
 				if nonstop_already_found {
 					//do not go right, it was ok and then it is bad again,
 					//we left the good area
 					we_broke_at=j
 					break 
 				} else {
+					if j>= we_broke_at { // we are under we_broke_at stop of prev line and we did not find any good area - we break completely
+						alignA=""
+						alignB=""
+						dist=threshold+1
+						ok=false
+						return
+					}
 					continue //looking
 				}
 			} else { //good area!!
@@ -109,15 +127,6 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			}
 
 
-			p := NW
-			if min == hgap {
-				p = Up
-			} else if min == vgap {
-				p = Left
-			}
-
-			pointer[idx(i, j, bLen)] = p
-			f[idx(i, j, bLen)] = min
 		}
 	}
 
