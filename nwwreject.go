@@ -74,13 +74,14 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	for i := 1; i < aLen; i++ {
 		nonstop_already_found := false 
 		for j := start_next_at; j < bLen; j++ {
+			var min int
 			if (j<=we_broke_at) {	
 				matchMismatch := mismatch
 				if a[i-1] == b[j-1] {
 					matchMismatch = 0
 				}
 
-				min := f[idx(i-1, j-1, bLen)] + matchMismatch
+				min = f[idx(i-1, j-1, bLen)] + matchMismatch
 				vgap := f[idx(i, j-1, bLen)] + gap
 				hgap := f[idx(i-1, j, bLen)] + gap
 
@@ -100,9 +101,11 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 				pointer[idx(i, j, bLen)] = p
 				f[idx(i, j, bLen)] = min
 			} else {
-				pointer[idx(i, j, bLen)] = Left 
-				f[idx(i, j, bLen)] = f[idx(i, j-1, bLen)] + gap
+				pointer[idx(i, j, bLen)] = Left
+				min=f[idx(i, j-1, bLen)] + gap
 			}
+			
+			f[idx(i, j, bLen)] = min
 
 			if min > threshold {
 				pointer[idx(i, j, bLen)] = Stop //the value is set already
