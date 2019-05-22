@@ -5,7 +5,6 @@
 
 package nwwreject
 import "log"
-import "fmt"
 
 var Version string = "0.0.1"
 
@@ -21,24 +20,31 @@ func idx(i, j, bLen int) int {
 	return (i * bLen) + j
 }
 
+func reverse(a []byte) {
+	for i := 0; i < len(a)/2; i++ {
+		j := len(a) - 1 - i
+		a[i], a[j] = a[j], a[i]
+	}
+}
+
 func logmati(mat []int,aLen int, bLen int) {
 	for i := 0; i < aLen; i++ {
 		for j := 0; j < bLen; j++ {
-			fmt.Print(mat[idx(i, j, bLen)],"  ")
+			log.Print(mat[idx(i, j, bLen)],"  ")
 		}
-		fmt.Println()
+		log.Println()
 	}
-	fmt.Println()
+	log.Println()
 }
 
 func logmatb(mat []byte,aLen int, bLen int) {
 	for i := 0; i < aLen; i++ {
 		for j := 0; j < bLen; j++ {
-			fmt.Print(mat[idx(i, j, bLen)],"  ")
+			log.Print(mat[idx(i, j, bLen)],"  ")
 		}
-		fmt.Println()
+		log.Println()
 	}
-	fmt.Println()
+	log.Println()
 }
 
 func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
@@ -148,39 +154,45 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			
 			f[idx(i, j, bLen)] = min
 			
-			fmt.Println("i:",i," j:",j," min:",min," p:",pointer[idx(i, j, bLen)]," tr:",threshold," st:",start_next_at," lgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) //debuug
+			//debug	
+			//log.Println("i:",i," j:",j," min:",min," p:",pointer[idx(i, j, bLen)]," tr:",threshold," st:",start_next_at," lgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) 
 			
-			if min > threshold {
-				pointer[idx(i, j, bLen)] = Stop //the value is set already
-				if nonstop_already_found {
-					//do not go right, it was ok and then it is bad again,
-					//we left the good area, so we mark the reamainder as bad
-					if i==aLen-1 { //if it is the last line, so we cannot rich the SE corner
-						give_up=true 			
-						break
-					}
-					we_broke_at=j
-					break
-				}  
-				//if we are here, nonstop_already_found is false
-				if j>= we_broke_at || j==bLen-1 { 
-					// we are under we_broke_at stop of prev line and we did not find any good area - we break completely (give_up)
-					// or, we are at the end of the line and we did not find any good area - we break completely (give_up)
+			if min<=threshold {	
+				//we are in good area
+				if !nonstop_already_found { 
+					//good area just started, mark it
+					nonstop_already_found=true
+					start_next_at=j //makes no sense to start under stop
+					first_good_prev=j
+				}
+				continue; //go on, next j
+			}
+			//if we are here, min > threshold 
+			pointer[idx(i, j, bLen)] = Stop //the value is set already
+			
+			if j>= we_broke_at || j==bLen-1 { 
+				// we are under we_broke_at or we are at the end of the line
+				//no chance to move right any more
+				if i==aLen-1 { 
+					//if it is the last line, so we cannot rich the SE corner, so we break completely (give_up){
 					give_up=true 			
 					break
 				}
-				//go on looking, nonstop_already_found is false yet
-			} else if !nonstop_already_found { 
-				//good area started!!
-				nonstop_already_found=true
-				start_next_at=j //makes no sense to start under stop
-				first_good_prev=j
+				if nonstop_already_found {
+					//ther was good are in the line, so we go on
+					we_broke_at=j
+					break
+				}
+				//if we are here, we did not find any good area on tis line, so we break completely (give_up)
+				give_up=true 			
+				break
 			}
 		} //j cycle
 	} //i cycle
 	
-	logmati(f,aLen,bLen)
-	logmatb(pointer,aLen,bLen)
+	//debug	
+	//logmati(f,aLen,bLen)
+	//logmatb(pointer,aLen,bLen)
 	
 	if (give_up) { //we gave up
 		alignA=""
@@ -190,7 +202,8 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 		return
 	}
 
-	log.Println("restoring..")
+	//debug	
+	//log.Println("restoring..")
 
 	i := aLen - 1
 	j := bLen - 1
@@ -225,9 +238,3 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	return string(aBytes), string(bBytes), dist, true
 }
 
-func reverse(a []byte) {
-	for i := 0; i < len(a)/2; i++ {
-		j := len(a) - 1 - i
-		a[i], a[j] = a[j], a[i]
-	}
-}
