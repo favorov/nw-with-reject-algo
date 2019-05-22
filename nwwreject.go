@@ -157,19 +157,20 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 					we_broke_at=j
 					break 
 				} else {
-					if j>= we_broke_at { // we are under we_broke_at stop of prev line and we did not find any good area - we break completely (give_up)
-						give_up=true
+					if j>= we_broke_at || j==bLen-1 { 
+						// we are under we_broke_at stop of prev line and we did not find any good area - we break completely (give_up)
+						// or, we are at the end of the line and we did not find any good area - we break completely (give_up)
+						give_up=true 			
 						break
 					}
-					continue //looking
+					//go on looking, nonstop_already_found is false yet
 				}
-			} else if !nonstop_already_found{ //good area started!!
+			} else if !nonstop_already_found { 
+				//good area started!!
 				nonstop_already_found=true
 				start_next_at=j //makes no sense to start under stop
 				first_good_prev=j
 			}
-
-
 		}
 	}
 	
