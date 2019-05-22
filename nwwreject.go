@@ -42,6 +42,7 @@ func logmatb(mat []byte,aLen int, bLen int) {
 }
 
 func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
+	//this is the most full version, returns alignment
 
 	aLen := len(a) + 1
 	bLen := len(b) + 1
