@@ -54,23 +54,43 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	aBytes := make([]byte, 0, maxLen)
 	bBytes := make([]byte, 0, maxLen)
 
-	we_broke_at:=bLen //move it away 
+	we_broke_at:=bLen  
+	give_up:=false
+	//we_broke_at is a critical value. 
+	//if we are on the right of we_broke_at (we are on the next line),
+	//we do not check any directions other than left
+	//if we do not open good cells on this line and we are under the we_broke_at
+	//we do not test we_broke_at+1
+	//we break completely by setting give_up flag to true
 	
+
+	start_next_at:=1
+	//where from to start next line of alignment matrix
+	first_good_prev:=0
+	//usually, it is start_next_at-1
+	first_stopped_head:=0
+	//which line is first to get >threshold distance and 
+	//stop as pointer at the head (0) position
+
+
 	f := make([]int, aLen*bLen)
 	pointer := make([]byte, aLen*bLen)
 
-	for i := 1; i < aLen; i++ {
+	pointer[0] = Here
+	
+	for i := 1; i < aLen; i++ { //vertical
 		dist := gap * i
 		f[idx(i, 0, bLen)] = dist
 		if dist <= threshold {
 			pointer[idx(i, 0, bLen)] = Up
 		} else {
 			pointer[idx(i, 0, bLen)] = Stop
+			first_stopped_head=i
 			break
 		}
 	}
 
-	for j := 1; j < bLen; j++ {
+	for j := 1; j < bLen; j++ { //horizontal
 		dist := gap * j
 		f[idx(0, j, bLen)] = dist
 		if dist <= threshold {
@@ -83,25 +103,13 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 		}
 	}
 
-	pointer[0] = Here
-
-	start_next_at:=1
-	//where from to start next line of alignment matrix
-
-	give_up:=false
-
-	//we_broke_at is a critical value. 
-	//if we are on the right of we_broke_at (we are on the next line),
-	//we do not check any directions other than left
-	//if we do not open good cells on this line and we are under the we_broke_at
-	//we do not test we_broke_at+1
-	//we break completely
 	for i := 1; i < aLen; i++ {
-		if give_up {break;}
+		if give_up {break;} //chau
+		if 0==first_good_prev && first_stopped_head == i {first_good_prev=1} 
 		nonstop_already_found := false 
 		for j := start_next_at; j < bLen; j++ {
 			var min int
-			if (j<=we_broke_at) {	
+			if (j<=we_broke_at) && (j>first_good_prev) { //we can test all 3 direction	
 				matchMismatch := mismatch
 				if a[i-1] == b[j-1] {
 					matchMismatch = 0
@@ -126,14 +134,20 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 
 				pointer[idx(i, j, bLen)] = p
 				f[idx(i, j, bLen)] = min
-			} else {
+			} else if (j>first_good_prev) {//ok, we can test only left
 				pointer[idx(i, j, bLen)] = Left
 				min=f[idx(i, j-1, bLen)] + gap
+			} else if (j<=we_broke_at) { //ok, maybe, up will help, left and NW are forbidden
+				pointer[idx(i, j, bLen)] = Up
+				min=f[idx(i-1, j, bLen)] + gap
+			} else {
+				pointer[idx(i, j, bLen)] = Stop 
+				min=threshold+1
 			}
 			
 			f[idx(i, j, bLen)] = min
 			
-			fmt.Println("i:",i," j:",j," min:",min," p:",pointer[idx(i, j, bLen)]," tr:",threshold," st:",start_next_at," br:",we_broke_at," msaf:",nonstop_already_found) //debuug
+			fmt.Println("i:",i," j:",j," min:",min," p:",pointer[idx(i, j, bLen)]," tr:",threshold," st:",start_next_at," lgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) //debuug
 			
 			if min > threshold {
 				pointer[idx(i, j, bLen)] = Stop //the value is set already
@@ -152,6 +166,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			} else if !nonstop_already_found{ //good area started!!
 				nonstop_already_found=true
 				start_next_at=j //makes no sense to start under stop
+				first_good_prev=j
 			}
 
 
