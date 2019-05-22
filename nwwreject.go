@@ -154,26 +154,30 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 				pointer[idx(i, j, bLen)] = Stop //the value is set already
 				if nonstop_already_found {
 					//do not go right, it was ok and then it is bad again,
-					//we left the good area
-					we_broke_at=j
-					break 
-				} else {
-					if j>= we_broke_at || j==bLen-1 { 
-						// we are under we_broke_at stop of prev line and we did not find any good area - we break completely (give_up)
-						// or, we are at the end of the line and we did not find any good area - we break completely (give_up)
+					//we left the good area, so we mark the reamainder as bad
+					if i==aLen-1 { //if it is the last line, so we cannot rich the SE corner
 						give_up=true 			
 						break
 					}
-					//go on looking, nonstop_already_found is false yet
+					we_broke_at=j
+					break
+				}  
+				//if we are here, nonstop_already_found is false
+				if j>= we_broke_at || j==bLen-1 { 
+					// we are under we_broke_at stop of prev line and we did not find any good area - we break completely (give_up)
+					// or, we are at the end of the line and we did not find any good area - we break completely (give_up)
+					give_up=true 			
+					break
 				}
+				//go on looking, nonstop_already_found is false yet
 			} else if !nonstop_already_found { 
 				//good area started!!
 				nonstop_already_found=true
 				start_next_at=j //makes no sense to start under stop
 				first_good_prev=j
 			}
-		}
-	}
+		} //j cycle
+	} //i cycle
 	
 	logmati(f,aLen,bLen)
 	logmatb(pointer,aLen,bLen)
