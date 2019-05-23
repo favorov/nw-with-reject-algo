@@ -11,7 +11,7 @@ import (
 	"log"
 	"math"
 	"github.com/favorov/nwwreject" 
-	// "./nwwreject" //debug
+	//"./nwwreject" //debug , supposes symlink project/cmd/nwwreject/nwwreject/nwwreject.go ---> project/nwwreject.go 
 )
 
 var seq1 = flag.String("seq1", "", "first sequence")
@@ -26,10 +26,18 @@ func main() {
 		log.Fatal("Please provide 2 sequences to align. See nwwreject --help")
 	}
 
-	fmt.Println("Calling nwwreject version",nwwreject.Version)
+	fmt.Println("nwwreject version",nwwreject.Version)
+	fmt.Println("call Align",nwwreject.Version)
 	aln1, aln2, dist ,ok := nwwreject.Align(*seq1, *seq2, *mismatch, *gap,*threshold)
 	if ok {
 		fmt.Printf("%s\n%s\nDistance: %d\n", aln1, aln2, dist)
+	} else {
+		fmt.Printf("Sequences differ too much.\n")
+	}
+	fmt.Println("call Distance",nwwreject.Version)
+	distince ,diok := nwwreject.Distance(*seq1, *seq2, *mismatch, *gap,*threshold)
+	if diok {
+		fmt.Printf("Distance: %d\n", distince)
 	} else {
 		fmt.Printf("Sequences differ too much.\n")
 	}

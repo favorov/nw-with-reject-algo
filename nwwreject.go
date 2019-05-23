@@ -5,8 +5,9 @@
 
 package nwwreject
 import "log"
+import "fmt"
 
-var Version string = "0.0.2"
+var Version string = "0.0.3"
 
 var (
 	Up   byte = 1
@@ -27,24 +28,24 @@ func reverse(a []byte) {
 	}
 }
 
-func logmati(mat []int,aLen int, bLen int) {
+func fmtmati(mat []int,aLen int, bLen int) {
 	for i := 0; i < aLen; i++ {
 		for j := 0; j < bLen; j++ {
-			log.Print(mat[idx(i, j, bLen)],"  ")
+			fmt.Print(mat[idx(i, j, bLen)],"  ")
 		}
-		log.Println()
+		fmt.Println()
 	}
-	log.Println()
+	fmt.Println()
 }
 
-func logmatb(mat []byte,aLen int, bLen int) {
+func fmtmatb(mat []byte,aLen int, bLen int) {
 	for i := 0; i < aLen; i++ {
 		for j := 0; j < bLen; j++ {
-			log.Print(mat[idx(i, j, bLen)],"  ")
+			fmt.Print(mat[idx(i, j, bLen)],"  ")
 		}
-		log.Println()
+		fmt.Println()
 	}
-	log.Println()
+	fmt.Println()
 }
 
 func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
@@ -75,9 +76,10 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	//where from to start next line of alignment matrix
 	first_good_prev:=0
 	//usually, it is start_next_at-1
-	first_stopped_head:=0
+	first_stopped_head:=aLen+1
 	//which line is first to get >threshold distance and 
 	//stop as pointer at the head (0) position
+	//init with never
 
 
 	f := make([]int, aLen*bLen)
@@ -112,7 +114,6 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 
 	for i := 1; i < aLen; i++ {
 		if give_up {break;} //chau
-		if 0==first_good_prev && first_stopped_head == i {first_good_prev=1} 
 		nonstop_already_found := false 
 		for j := start_next_at; j < bLen; j++ {
 			var min int
@@ -155,7 +156,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			f[idx(i, j, bLen)] = min
 			
 			//debug	
-			//log.Println("i:",i," j:",j," min:",min," p:",pointer[idx(i, j, bLen)]," tr:",threshold," st:",start_next_at," lgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) 
+			//fmt.Println("i:",i," j:",j," min:",min," p:",pointer[idx(i, j, bLen)]," tr:",threshold," st:",start_next_at," fgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) 
 			
 			if min<=threshold {	
 				//we are in good area
@@ -163,7 +164,11 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 					//good area just started, mark it
 					nonstop_already_found=true
 					start_next_at=j //makes no sense to start under stop
-					first_good_prev=j
+					if 1==j && first_stopped_head > i {
+						first_good_prev=0
+					} else { 
+						first_good_prev=j
+					}
 				}
 				continue; //go on, next j
 			}
@@ -191,8 +196,8 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	} //i cycle
 	
 	//debug	
-	//logmati(f,aLen,bLen)
-	//logmatb(pointer,aLen,bLen)
+	//fmtmati(f,aLen,bLen)
+	//fmtmatb(pointer,aLen,bLen)
 	
 	if (give_up) { //we gave up
 		return "","",threshold+1,false
@@ -233,6 +238,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 
 	return string(aBytes), string(bBytes), dist, true
 }
+
 func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 	//this is the fast version, returns distance only if success -- 
 	//no pointer matrix 
@@ -259,7 +265,7 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 	//where from to start next line of alignment matrix
 	first_good_prev:=0
 	//usually, it is start_next_at-1, sometimes. start_next_at
-	first_stopped_head:=0
+	first_stopped_head:=aLen+1
 	//which line is first to get >threshold distance and 
 
 
@@ -287,7 +293,6 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 
 	for i := 1; i < aLen; i++ {
 		if give_up {break;} //chau
-		if 0==first_good_prev && first_stopped_head == i {first_good_prev=1} 
 		nonstop_already_found := false 
 		for j := start_next_at; j < bLen; j++ {
 			var min int
@@ -320,7 +325,7 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 			f[idx(i, j, bLen)] = min
 			
 			//debug	
-			//log.Println("i:",i," j:",j," min:",min," tr:",threshold," st:",start_next_at," lgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) 
+			//log.Println("i:",i," j:",j," min:",min," tr:",threshold," st:",start_next_at," fgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) 
 			
 			if min<=threshold {	
 				//we are in good area
@@ -328,7 +333,11 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 					//good area just started, mark it
 					nonstop_already_found=true
 					start_next_at=j //makes no sense to start under stop
-					first_good_prev=j
+					if 1==j && first_stopped_head > i {
+						first_good_prev=0
+					} else { 
+						first_good_prev=j
+					}
 				}
 				continue; //go on, next j
 			}
@@ -355,12 +364,12 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 	} //i cycle
 	
 	//debug	
-	//logmati(f,aLen,bLen)
+	//fmtmati(f,aLen,bLen)
 	
 	if (give_up) { //we gave up
 		return threshold+1,false 
 	}
 	
-	return f[f[idx(aLen-1, bLen-1, bLen)]], true
+	return f[idx(aLen-1, bLen-1, bLen)], true
 }
 
