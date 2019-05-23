@@ -11,12 +11,23 @@ import (
 
 func TestAlign(t *testing.T) {
 	seqs := [][]string{
-		[]string{"CGAGAGA", "GAGAGA", "CGAGAGA", "-GAGAGA"}}
+		[]string{"CGAGAGA", "GAGAGA", "CGAGAGA", "-GAGAGA"},
+		[]string{"GAGAGAC", "GAGAGA", "GAGAGAC", "GAGAGA-"},
+		[]string{"GAGAGA", "CGAGAGA", "-GAGAGA", "CGAGAGA"},
+		[]string{"GAGAGA", "GAGAGAC", "GAGAGA-", "GAGAGAC"},
+		[]string{"GAGAGAC", "GAGAGAT", "GAGAGAC","GAGAGAT"},
+		}
 
 	for _, a := range seqs {
 		aln1, aln2, dist, ok := Align(a[0], a[1], 1, 1, 10)
 		if aln1 != a[2] || aln2 != a[3] || dist !=1 || !ok{
-			t.Errorf("Align(%s, %s)\n***GOT***\n%s\n%s\n%d\n%t\n***WANT***\n%s\n%s\n%d\n%t", a[0], a[1],aln1, aln2,  1, true, a[2], a[3], dist, ok)
+			t.Errorf("Align(%s, %s)\n***GOT***\n%s\n%s\n%d\n%t\n***WANT***\n%s\n%s\n%d\n%t", a[0], a[1],    aln1, aln2,1,true, a[2],a[3],dist,ok)
+		}
+	}
+	for _, a := range seqs {
+		aln1, aln2, dist, ok := Align(a[0], a[1], 1, 1, 1)
+		if aln1 != a[2] || aln2 != a[3] || dist !=1 || !ok{
+			t.Errorf("Align(%s, %s)\n***GOT***\n%s\n%s\n%d\n%t\n***WANT***\n%s\n%s\n%d\n%t", a[0], a[1],    aln1, aln2,1,true, a[2],a[3],dist,ok)
 		}
 	}
 
