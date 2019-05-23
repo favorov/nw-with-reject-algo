@@ -6,7 +6,7 @@
 package nwwreject
 import "log"
 
-var Version string = "0.0.1"
+var Version string = "0.0.2"
 
 var (
 	Up   byte = 1
@@ -48,7 +48,7 @@ func logmatb(mat []byte,aLen int, bLen int) {
 }
 
 func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
-	//this is the most full version, returns alignment
+	//this is the most full version, returns alignment if success
 
 	aLen := len(a) + 1
 	bLen := len(b) + 1
@@ -195,11 +195,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	//logmatb(pointer,aLen,bLen)
 	
 	if (give_up) { //we gave up
-		alignA=""
-		alignB=""
-		dist=threshold+1
-		ok=false
-		return
+		return "","",threshold+1,false
 	}
 
 	//debug	
@@ -236,5 +232,135 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	reverse(bBytes)
 
 	return string(aBytes), string(bBytes), dist, true
+}
+func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
+	//this is the fast version, returns distance only if success -- 
+	//no pointer matrix 
+
+	aLen := len(a) + 1
+	bLen := len(b) + 1
+
+	maxLen := aLen
+	if maxLen < bLen {
+		maxLen = bLen
+	}
+
+	we_broke_at:=bLen  
+	give_up:=false
+	//we_broke_at is a critical value. 
+	//if we are on the right of we_broke_at (we are on the next line),
+	//we do not check any directions other than left
+	//if we do not open good cells on this line and we are under the we_broke_at
+	//we do not test we_broke_at+1
+	//we break completely by setting give_up flag to true
+	
+
+	start_next_at:=1
+	//where from to start next line of alignment matrix
+	first_good_prev:=0
+	//usually, it is start_next_at-1, sometimes. start_next_at
+	first_stopped_head:=0
+	//which line is first to get >threshold distance and 
+
+
+	f := make([]int, aLen*bLen)
+
+	
+	for i := 1; i < aLen; i++ { //vertical
+		dist := gap * i
+		f[idx(i, 0, bLen)] = dist
+		if dist > threshold {
+			first_stopped_head=i
+			break
+		}
+	}
+
+	for j := 1; j < bLen; j++ { //horizontal
+		dist := gap * j
+		f[idx(0, j, bLen)] = dist
+		if dist > threshold {
+			we_broke_at=j
+			//where the Stop appeared in a finshed line
+			break
+		}
+	}
+
+	for i := 1; i < aLen; i++ {
+		if give_up {break;} //chau
+		if 0==first_good_prev && first_stopped_head == i {first_good_prev=1} 
+		nonstop_already_found := false 
+		for j := start_next_at; j < bLen; j++ {
+			var min int
+			if (j<=we_broke_at) && (j>first_good_prev) { //we can test all 3 direction	
+				matchMismatch := mismatch
+				if a[i-1] == b[j-1] {
+					matchMismatch = 0
+				}
+
+				min = f[idx(i-1, j-1, bLen)] + matchMismatch
+				vgap := f[idx(i, j-1, bLen)] + gap
+				hgap := f[idx(i-1, j, bLen)] + gap
+
+				if hgap < min {
+					min = hgap
+				}
+				if vgap < min {
+					min = vgap
+				}
+
+				f[idx(i, j, bLen)] = min
+			} else if (j>first_good_prev) {//ok, we can test only left
+				min=f[idx(i, j-1, bLen)] + gap
+			} else if (j<=we_broke_at) { //ok, maybe, up will help, left and NW are forbidden
+				min=f[idx(i-1, j, bLen)] + gap
+			} else {
+				min=threshold+1
+			}
+			
+			f[idx(i, j, bLen)] = min
+			
+			//debug	
+			//log.Println("i:",i," j:",j," min:",min," tr:",threshold," st:",start_next_at," lgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) 
+			
+			if min<=threshold {	
+				//we are in good area
+				if !nonstop_already_found { 
+					//good area just started, mark it
+					nonstop_already_found=true
+					start_next_at=j //makes no sense to start under stop
+					first_good_prev=j
+				}
+				continue; //go on, next j
+			}
+			//if we are here, min > threshold 
+			
+			if j>= we_broke_at || j==bLen-1 { 
+				// we are under we_broke_at or we are at the end of the line
+				//no chance to move right any more
+				if i==aLen-1 { 
+					//if it is the last line, so we cannot rich the SE corner, so we break completely (give_up){
+					give_up=true 			
+					break
+				}
+				if nonstop_already_found {
+					//ther was good are in the line, so we go on
+					we_broke_at=j
+					break
+				}
+				//if we are here, we did not find any good area on tis line, so we break completely (give_up)
+				give_up=true 			
+				break
+			}
+		} //j cycle
+	} //i cycle
+	
+	//debug	
+	//logmati(f,aLen,bLen)
+	
+	if (give_up) { //we gave up
+		return threshold+1,false 
+	}
+	
+	return f[f[idx(aLen-1, bLen-1, bLen)]], true
 }
 

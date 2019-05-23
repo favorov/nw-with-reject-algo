@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"log"
 	"math"
-	//"github.com/favorov/nwwreject" debuug
-	"./nwwreject"
+	"github.com/favorov/nwwreject" 
+	// "./nwwreject" //debug
 )
 
 var seq1 = flag.String("seq1", "", "first sequence")
