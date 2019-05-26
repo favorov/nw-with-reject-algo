@@ -7,7 +7,7 @@ package nwwreject
 import "log"
 import "fmt"
 
-var Version string = "0.0.3"
+var Version string = "0.0.4"
 
 var (
 	Up   byte = 1
@@ -16,6 +16,18 @@ var (
 	Here byte = 4
 	Stop byte = 5
 )
+
+var f []int //not to allocate each call, it is the distance matrix
+var pointer []byte //not to allocate each call, it is the distance matrix
+
+func Init_distance_matrix(maxlen int){
+	f=make([]int,maxlen*maxlen)
+}
+
+func Init_pointer_matrix(maxlen int){
+	pointer=make([]byte,maxlen*maxlen)
+} //these two are not obligatory, but the are good style
+
 
 func idx(i, j, bLen int) int {
 	return (i * bLen) + j
@@ -48,6 +60,7 @@ func fmtmatb(mat []byte,aLen int, bLen int) {
 	fmt.Println()
 }
 
+
 func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, dist int, ok bool) {
 	//this is the most full version, returns alignment if success
 
@@ -62,7 +75,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	aBytes := make([]byte, 0, maxLen)
 	bBytes := make([]byte, 0, maxLen)
 
-	we_broke_at:=bLen  
+	we_broke_at:=bLen
 	give_up:=false
 	//we_broke_at is a critical value. 
 	//if we are on the right of we_broke_at (we are on the next line),
@@ -70,7 +83,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	//if we do not open good cells on this line and we are under the we_broke_at
 	//we do not test we_broke_at+1
 	//we break completely by setting give_up flag to true
-	
+
 
 	start_next_at:=1
 	//where from to start next line of alignment matrix
@@ -81,12 +94,24 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 	//stop as pointer at the head (0) position
 	//init with never
 
+	if len(f) < aLen*bLen {
+		f = make([]int, aLen*bLen)
+	} else {
+		for i:= range f {
+			f[i]=0
+		}
+	}
 
-	f := make([]int, aLen*bLen)
-	pointer := make([]byte, aLen*bLen)
+	if len(pointer) < aLen*bLen {
+		pointer = make([]byte, aLen*bLen)
+	} else {
+		for i:= range pointer {
+			pointer[i]=0
+		}
+	}
 
 	pointer[0] = Here
-	
+
 	for i := 1; i < aLen; i++ { //vertical
 		dist := gap * i
 		f[idx(i, 0, bLen)] = dist
@@ -114,7 +139,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 
 	for i := 1; i < aLen; i++ {
 		if give_up {break;} //chau
-		nonstop_already_found := false 
+		nonstop_already_found := false
 		for j := start_next_at; j < bLen; j++ {
 			var min int
 			if (j<=we_broke_at) && (j>first_good_prev) { //we can test all 3 direction	
@@ -149,24 +174,24 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 				pointer[idx(i, j, bLen)] = Up
 				min=f[idx(i-1, j, bLen)] + gap
 			} else {
-				pointer[idx(i, j, bLen)] = Stop 
+				pointer[idx(i, j, bLen)] = Stop
 				min=threshold+1
 			}
-			
+
 			f[idx(i, j, bLen)] = min
-			
+
 			//debug	
 			//fmt.Println("i:",i," j:",j," min:",min," p:",pointer[idx(i, j, bLen)]," tr:",threshold," st:",start_next_at," fgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) 
-			
-			if min<=threshold {	
+
+			if min<=threshold {
 				//we are in good area
-				if !nonstop_already_found { 
+				if !nonstop_already_found {
 					//good area just started, mark it
 					nonstop_already_found=true
 					start_next_at=j //makes no sense to start under stop
 					if 1==j && first_stopped_head > i {
 						first_good_prev=0
-					} else { 
+					} else {
 						first_good_prev=j
 					}
 				}
@@ -174,13 +199,13 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 			}
 			//if we are here, min > threshold 
 			pointer[idx(i, j, bLen)] = Stop //the value is set already
-			
-			if j>= we_broke_at || j==bLen-1 { 
+
+			if j>= we_broke_at || j==bLen-1 {
 				// we are under we_broke_at or we are at the end of the line
 				//no chance to move right any more
-				if i==aLen-1 { 
-					//if it is the last line, so we cannot rich the SE corner, so we break completely (give_up){
-					give_up=true 			
+				if i==aLen-1 {
+					//if it is the last line, so we cannot rich the SE corner, so we break completely (give_up)
+					give_up=true
 					break
 				}
 				if nonstop_already_found {
@@ -189,16 +214,16 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 					break
 				}
 				//if we are here, we did not find any good area on tis line, so we break completely (give_up)
-				give_up=true 			
+				give_up=true
 				break
 			}
 		} //j cycle
 	} //i cycle
-	
+
 	//debug	
 	//fmtmati(f,aLen,bLen)
 	//fmtmatb(pointer,aLen,bLen)
-	
+
 	if (give_up) { //we gave up
 		return "","",threshold+1,false
 	}
@@ -251,7 +276,7 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 		maxLen = bLen
 	}
 
-	we_broke_at:=bLen  
+	we_broke_at:=bLen
 	give_up:=false
 	//we_broke_at is a critical value. 
 	//if we are on the right of we_broke_at (we are on the next line),
@@ -259,7 +284,7 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 	//if we do not open good cells on this line and we are under the we_broke_at
 	//we do not test we_broke_at+1
 	//we break completely by setting give_up flag to true
-	
+
 
 	start_next_at:=1
 	//where from to start next line of alignment matrix
@@ -269,9 +294,15 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 	//which line is first to get >threshold distance and 
 
 
-	f := make([]int, aLen*bLen)
+	if len(f) < aLen*bLen {
+		f = make([]int, aLen*bLen)
+	} else {
+		for i:= range f {
+			f[i]=0
+		}
+	}
 
-	
+
 	for i := 1; i < aLen; i++ { //vertical
 		dist := gap * i
 		f[idx(i, 0, bLen)] = dist
@@ -293,7 +324,7 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 
 	for i := 1; i < aLen; i++ {
 		if give_up {break;} //chau
-		nonstop_already_found := false 
+		nonstop_already_found := false
 		for j := start_next_at; j < bLen; j++ {
 			var min int
 			if (j<=we_broke_at) && (j>first_good_prev) { //we can test all 3 direction	
@@ -321,34 +352,34 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 			} else {
 				min=threshold+1
 			}
-			
+
 			f[idx(i, j, bLen)] = min
-			
+
 			//debug	
 			//log.Println("i:",i," j:",j," min:",min," tr:",threshold," st:",start_next_at," fgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) 
-			
-			if min<=threshold {	
+
+			if min<=threshold {
 				//we are in good area
-				if !nonstop_already_found { 
+				if !nonstop_already_found {
 					//good area just started, mark it
 					nonstop_already_found=true
 					start_next_at=j //makes no sense to start under stop
 					if 1==j && first_stopped_head > i {
 						first_good_prev=0
-					} else { 
+					} else {
 						first_good_prev=j
 					}
 				}
 				continue; //go on, next j
 			}
 			//if we are here, min > threshold 
-			
-			if j>= we_broke_at || j==bLen-1 { 
+
+			if j>= we_broke_at || j==bLen-1 {
 				// we are under we_broke_at or we are at the end of the line
 				//no chance to move right any more
-				if i==aLen-1 { 
-					//if it is the last line, so we cannot rich the SE corner, so we break completely (give_up){
-					give_up=true 			
+				if i==aLen-1 {
+					//if it is the last line, so we cannot rich the SE corner, so we break completely (give_up)
+					give_up=true
 					break
 				}
 				if nonstop_already_found {
@@ -357,19 +388,19 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 					break
 				}
 				//if we are here, we did not find any good area on tis line, so we break completely (give_up)
-				give_up=true 			
+				give_up=true
 				break
 			}
 		} //j cycle
 	} //i cycle
-	
+
 	//debug	
 	//fmtmati(f,aLen,bLen)
-	
+
 	if (give_up) { //we gave up
-		return threshold+1,false 
+		return threshold+1,false
 	}
-	
+
 	return f[idx(aLen-1, bLen-1, bLen)], true
 }
 
