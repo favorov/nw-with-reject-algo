@@ -96,18 +96,10 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 
 	if len(f) < aLen*bLen {
 		f = make([]int, aLen*bLen)
-	} else {
-		for i:= range f {
-			f[i]=0
-		}
 	}
 
 	if len(pointer) < aLen*bLen {
 		pointer = make([]byte, aLen*bLen)
-	} else {
-		for i:= range pointer {
-			pointer[i]=0
-		}
 	}
 
 	pointer[0] = Here
@@ -164,7 +156,6 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 				} else if min == vgap {
 					p = Left
 				}
-
 				pointer[idx(i, j, bLen)] = p
 				f[idx(i, j, bLen)] = min
 			} else if (j>first_good_prev) {//ok, we can test only left
@@ -296,12 +287,7 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 
 	if len(f) < aLen*bLen {
 		f = make([]int, aLen*bLen)
-	} else {
-		for i:= range f {
-			f[i]=0
-		}
 	}
-
 
 	for i := 1; i < aLen; i++ { //vertical
 		dist := gap * i
@@ -403,4 +389,3 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 
 	return f[idx(aLen-1, bLen-1, bLen)], true
 }
-
