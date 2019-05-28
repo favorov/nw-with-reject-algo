@@ -300,18 +300,20 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 		f = make([]int, aLen*bLen)
 	}
 
-	for i := 1; i < aLen; i++ { //vertical
+	f[0]=0 //actually, we never change it
+
+	for i,ind := 1,idx(1, 0, bLen); i < aLen; i,ind=i+1,ind+bLen { //vertical
 		dist := gap * i
-		f[idx(i, 0, bLen)] = dist
+		f[ind] = dist
 		if dist > threshold {
 			first_stopped_head=i
 			break
 		}
 	}
 
-	for j := 1; j < bLen; j++ { //horizontal
+	for j,ind := 1,idx(0, 1, bLen); j < bLen; j,ind=j+1,ind+1 { //horizontal
 		dist := gap * j
-		f[idx(0, j, bLen)] = dist
+		f[ind] = dist
 		if dist > threshold {
 			we_broke_at=j
 			//where the Stop appeared in a finshed line
