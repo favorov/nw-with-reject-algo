@@ -7,7 +7,7 @@ package nwwreject
 import "log"
 import "fmt"
 
-var Version string = "0.0.4"
+var Version string = "0.0.5"
 
 var (
 	Up   byte = 1
@@ -129,20 +129,31 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 		}
 	}
 
+	var ind,left_ind,up_ind,nw_ind int
+
 	for i := 1; i < aLen; i++ {
 		if give_up {break;} //chau
 		nonstop_already_found := false
+		ind=idx(i, start_next_at-1, bLen)
+		left_ind=ind-1
+		up_ind=ind-bLen
+		nw_ind=ind-bLen-1
+		//all the indexes are for left neighbout our first j, we will++ it in the start of j cycle 
 		for j := start_next_at; j < bLen; j++ {
 			var min int
+			ind++
+			left_ind++
+			up_ind++
+			nw_ind++
 			if (j<=we_broke_at) && (j>first_good_prev) { //we can test all 3 direction	
 				matchMismatch := mismatch
 				if a[i-1] == b[j-1] {
 					matchMismatch = 0
 				}
 
-				min = f[idx(i-1, j-1, bLen)] + matchMismatch
-				vgap := f[idx(i, j-1, bLen)] + gap
-				hgap := f[idx(i-1, j, bLen)] + gap
+				min = f[nw_ind] + matchMismatch
+				vgap := f[left_ind] + gap
+				hgap := f[up_ind] + gap
 
 				if hgap < min {
 					min = hgap
@@ -156,23 +167,23 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 				} else if min == vgap {
 					p = Left
 				}
-				pointer[idx(i, j, bLen)] = p
-				f[idx(i, j, bLen)] = min
+				pointer[ind] = p
+				f[ind] = min
 			} else if (j>first_good_prev) {//ok, we can test only left
-				pointer[idx(i, j, bLen)] = Left
-				min=f[idx(i, j-1, bLen)] + gap
+				pointer[ind] = Left
+				min=f[left_ind] + gap
 			} else if (j<=we_broke_at) { //ok, maybe, up will help, left and NW are forbidden
-				pointer[idx(i, j, bLen)] = Up
-				min=f[idx(i-1, j, bLen)] + gap
+				pointer[ind] = Up
+				min=f[up_ind] + gap
 			} else {
-				pointer[idx(i, j, bLen)] = Stop
+				pointer[ind] = Stop
 				min=threshold+1
 			}
 
-			f[idx(i, j, bLen)] = min
+			f[ind] = min
 
 			//debug	
-			//fmt.Println("i:",i," j:",j," min:",min," p:",pointer[idx(i, j, bLen)]," tr:",threshold," st:",start_next_at," fgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) 
+			//fmt.Println("i:",i," j:",j," min:",min," p:",pointer[ind]," tr:",threshold," st:",start_next_at," fgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) 
 
 			if min<=threshold {
 				//we are in good area
@@ -189,7 +200,7 @@ func Align(a, b string, mismatch, gap, threshold int) (alignA, alignB string, di
 				continue; //go on, next j
 			}
 			//if we are here, min > threshold 
-			pointer[idx(i, j, bLen)] = Stop //the value is set already
+			pointer[ind] = Stop //the value is set already
 
 			if j>= we_broke_at || j==bLen-1 {
 				// we are under we_broke_at or we are at the end of the line
@@ -308,20 +319,30 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 		}
 	}
 
+	var ind,left_ind,up_ind,nw_ind int
+
 	for i := 1; i < aLen; i++ {
 		if give_up {break;} //chau
 		nonstop_already_found := false
+		ind=idx(i, start_next_at-1, bLen)
+		left_ind=ind-1
+		up_ind=ind-bLen
+		nw_ind=ind-bLen-1
 		for j := start_next_at; j < bLen; j++ {
 			var min int
+			ind++
+			left_ind++
+			up_ind++
+			nw_ind++
 			if (j<=we_broke_at) && (j>first_good_prev) { //we can test all 3 direction	
 				matchMismatch := mismatch
 				if a[i-1] == b[j-1] {
 					matchMismatch = 0
 				}
 
-				min = f[idx(i-1, j-1, bLen)] + matchMismatch
-				vgap := f[idx(i, j-1, bLen)] + gap
-				hgap := f[idx(i-1, j, bLen)] + gap
+				min = f[nw_ind] + matchMismatch
+				vgap := f[left_ind] + gap
+				hgap := f[up_ind] + gap
 
 				if hgap < min {
 					min = hgap
@@ -332,14 +353,14 @@ func Distance(a, b string, mismatch, gap, threshold int) (dist int, ok bool) {
 
 				f[idx(i, j, bLen)] = min
 			} else if (j>first_good_prev) {//ok, we can test only left
-				min=f[idx(i, j-1, bLen)] + gap
+				min=f[left_ind] + gap
 			} else if (j<=we_broke_at) { //ok, maybe, up will help, left and NW are forbidden
-				min=f[idx(i-1, j, bLen)] + gap
+				min=f[up_ind] + gap
 			} else {
 				min=threshold+1
 			}
 
-			f[idx(i, j, bLen)] = min
+			f[ind] = min
 
 			//debug	
 			//log.Println("i:",i," j:",j," min:",min," tr:",threshold," st:",start_next_at," fgp: ",first_good_prev," br:",we_broke_at," msaf:",nonstop_already_found) 
