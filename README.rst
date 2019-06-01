@@ -2,7 +2,7 @@
 nwwreject - Needleman-Wunsch Alignment with rejecting in Go
 ===============================================================================
 
-Current version is 0.0.1
+Current version is 0.0.5
 
 -------------------------------------------------------------------------------
 About
@@ -20,7 +20,7 @@ The Needleman-Wunsch global alignment algorith computes the alignment score and
 optimal global alignment. The modification we put here (NW with reject) rejects to proceed if all there is no way to biuld an alignment better than some threshold
 
 
-It is based on: https://github.com/aebruno/nwalgo realisation of NW in Go.
+It was origially based on: https://github.com/aebruno/nwalgo realisation of NW in Go.
 
 -------------------------------------------------------------------------------
 Install

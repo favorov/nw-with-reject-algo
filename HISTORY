@@ -1,1 +1,3 @@
-0.0.4 is the first working fast verion
+0.0.3: It is the first working verion
+0.0.4: We found that we spend 99% of time in allocationg matrices. Using static to overcome it. Now, it is nonparallel until we pay attention to parallel issues.
+0.0.5: Pointer arithmetic optimised. Like 10 times faster now.
